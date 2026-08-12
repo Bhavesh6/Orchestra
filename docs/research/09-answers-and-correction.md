@@ -217,7 +217,7 @@ Same shape for `api/openapi.yaml` (constraints = schema lint + conformance tests
 
 **There isn't one. That's the design.**
 
-Agents do not message each other. They read and write a typed blackboard. An agent's entire output is one structured result object (full schema in [Doc 3 §3.7](03-multi-agent-architecture.md)):
+Agents do not message each other. They read and write a typed blackboard. An agent's entire output is one structured result object (full schema in [Doc 3 §3.7](03-multi-agent.md)):
 
 ```jsonc
 {
@@ -310,7 +310,7 @@ Right-sized for a solo developer, not an enterprise:
 - Known-good firmware rollback.
 - No unattended flash→observe→reflash loops beyond N iterations.
 
-Most of [Doc 5](05-security-architecture.md) is enterprise-scale and you should ignore the parts that are. The sandbox default, the key handling, and the hardware gates are the parts that matter at your scale.
+Most of [Doc 5](05-security.md) is enterprise-scale and you should ignore the parts that are. The sandbox default, the key handling, and the hardware gates are the parts that matter at your scale.
 
 ### N. Surviving provider unavailability
 

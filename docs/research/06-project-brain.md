@@ -24,7 +24,7 @@ Antigravity independently arrived at something similar — a knowledge base that
 3. **Every claim carries evidence.** A statement without a source is an assumption, and it's labeled as one.
 4. **Append-only decisions.** Decisions are never edited, only superseded — with a pointer to what superseded them and why.
 5. **Exposed via MCP.** The Brain is an MCP server (Doc 2 §2.3), so our agents and external tools read it through one interface.
-6. **Writes are typed and validated.** No free-text writes into structured regions. This is also the T8 (blackboard poisoning) control from [Document 5](05-security-architecture.md).
+6. **Writes are typed and validated.** No free-text writes into structured regions. This is also the T8 (blackboard poisoning) control from [Document 5](05-security.md).
 
 ---
 

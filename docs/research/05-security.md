@@ -90,7 +90,7 @@ Claude Code has already hit this and documented the mitigations, which is a gift
 Our version, made structural rather than behavioral:
 
 1. **Permissions are bound to the agent's role and task, granted by the orchestrator before dispatch.** They are never derived from anything an agent says or writes.
-2. **Agents cannot send each other instructions at all** — no mailbox, blackboard only ([Document 3](03-multi-agent-architecture.md) §3.5). Removing the channel removes the attack.
+2. **Agents cannot send each other instructions at all** — no mailbox, blackboard only ([Document 3](03-multi-agent.md) §3.5). Removing the channel removes the attack.
 3. **Blackboard writes are typed and validated.** An agent writes `claims`, `contracts`, `evidence`. There is no schema field in which "please push for me" is a valid value.
 4. **Only the orchestrator dispatches**, and only from the DAG. There is no path from agent output to agent invocation that doesn't pass through the planner and its policy checks.
 5. **Human-in-the-loop consent is never delegable.** An approval token is bound to (user, action, target, time) and cannot be replayed by another agent.

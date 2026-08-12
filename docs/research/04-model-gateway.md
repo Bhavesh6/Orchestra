@@ -42,7 +42,7 @@ Building the first half from scratch would be months of adapter maintenance for 
 
 **Decision: wrap, don't write.** Use an existing multi-provider library as the transport adapter layer, and put **our** value in the two boxes above it: the **capability model** and the **router**. If we later need a provider the library lacks, we write one adapter — not forty.
 
-Which library depends on our language choice ([Document 7](07-implementation-roadmap.md) §7.6): **Vercel AI SDK** if TypeScript, **LiteLLM** if Python or as a sidecar gateway. LiteLLM's gateway mode is attractive independent of language because it gives us cost tracking, load balancing, and fallbacks as infrastructure rather than code. **[2°]**
+Which library depends on our language choice ([Document 7](07-original-roadmap.md) §7.6): **Vercel AI SDK** if TypeScript, **LiteLLM** if Python or as a sidecar gateway. LiteLLM's gateway mode is attractive independent of language because it gives us cost tracking, load balancing, and fallbacks as infrastructure rather than code. **[2°]**
 
 ---
 

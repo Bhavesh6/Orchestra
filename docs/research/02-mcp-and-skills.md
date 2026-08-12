@@ -21,7 +21,7 @@ Plus: **header-based routing** (`Mcp-Method`, `Mcp-Name` HTTP headers let gatewa
 
 **The stateless core is a gift.** Our orchestrator wants to run N agents concurrently, each needing tool access. A stateful protocol would have forced per-agent sessions, sticky routing, and shared session storage. A stateless protocol means we can pool MCP connections and fan them out across agents behind a plain load balancer. **[Inf]** — this is my reading of the consequence, not a spec statement.
 
-**Header-based routing is exactly what a multi-agent gateway needs.** We can enforce per-agent tool policy at the HTTP layer by inspecting `Mcp-Method`/`Mcp-Name`, without deserializing every payload. That is our permission enforcement point ([Document 5](05-security-architecture.md)).
+**Header-based routing is exactly what a multi-agent gateway needs.** We can enforce per-agent tool policy at the HTTP layer by inspecting `Mcp-Method`/`Mcp-Name`, without deserializing every payload. That is our permission enforcement point ([Document 5](05-security.md)).
 
 > ⚠️ **Verify before building:** re-read the actual spec text from an unblocked network. The summary above is from the official spec blog post, which is authoritative but is still a summary. Specifically confirm the exact `_meta` shape and the MRTR retry semantics.
 
@@ -54,7 +54,7 @@ The clean framing from the ecosystem: *MCP is vertical* (agent → tools), *A2A 
 
 1. Our agents are **inside one trust boundary, one process group, one project**. A2A solves cross-organizational discovery and negotiation — a problem we don't have. Adopting it would import authentication, agent cards, and message envelopes to talk between two of our own goroutines.
 2. Critical analyses in 2026 note A2A's adoption lagged relative to MCP precisely because of implementation burden vs use case. **[2°]**
-3. Internal coordination in our design is **not conversational** — it is a blackboard plus a task graph (see [Document 3](03-multi-agent-architecture.md)). A2A's message-passing model would push us toward chat-between-agents, which the failure literature says is where multi-agent systems break.
+3. Internal coordination in our design is **not conversational** — it is a blackboard plus a task graph (see [Document 3](03-multi-agent.md)). A2A's message-passing model would push us toward chat-between-agents, which the failure literature says is where multi-agent systems break.
 
 **But:** expose an **optional A2A adapter at the perimeter** in a late phase, so external A2A agents can be recruited as workers (brief §23). Class **C** — integrate, never depend.
 
@@ -92,7 +92,7 @@ This is the important part and it is where we differ from every competitor.
 An agent does not see "all tools." It sees the tools its **role** grants, filtered by the **task's** declared needs. A Firmware Agent gets `platformio.*`, `serial.*`, filesystem within its worktree. It does **not** get `github.push` or `browser.*`.
 
 Two reasons, and the second is the one people forget:
-- **Security** — least privilege ([Document 5](05-security-architecture.md)).
+- **Security** — least privilege ([Document 5](05-security.md)).
 - **Accuracy** — tool-choice quality degrades as tool count grows. An agent with 200 tools in context picks worse than one with 12. This is the same logic as Claude Code's context-economy argument for subagents. **[Inf]**, though widely observed.
 
 ### Role 3 — Server
@@ -176,7 +176,7 @@ risk: medium          # gates which approval tier applies
 
 `requires_tools` lets the router **scope the agent's tool view from the skill**, closing the loop between §2.3 and skills. `verification` names the check that must pass before the agent may claim completion (brief §18).
 
-> One caution, and it applies to us as much as anyone: **a skill is untrusted-ish input.** A skill installed from a marketplace is a text file that instructs an agent. That is an injection vector. Skills need the same provenance treatment as MCP servers — see [Document 5](05-security-architecture.md) §5.6. Codex already gates this with `/hooks` trust management for hooks; we should do the same for skills. **[2°]**
+> One caution, and it applies to us as much as anyone: **a skill is untrusted-ish input.** A skill installed from a marketplace is a text file that instructs an agent. That is an injection vector. Skills need the same provenance treatment as MCP servers — see [Document 5](05-security.md) §5.6. Codex already gates this with `/hooks` trust management for hooks; we should do the same for skills. **[2°]**
 
 ---
 

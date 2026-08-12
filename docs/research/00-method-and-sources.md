@@ -116,11 +116,11 @@ Where a competitor's behavior is class E but the *capability* is desirable, we r
 
 | Doc | Read it if you want |
 | --- | --- |
-| [01 — Competitive Architecture Study](01-competitive-architecture-study.md) | What the six systems actually do, and the capability matrix |
-| [02 — MCP and Skills Architecture](02-mcp-and-skills-architecture.md) | How we consume MCP without forking it, and what a Skill is vs a tool |
-| [03 — Multi-Agent Architecture](03-multi-agent-architecture.md) | The orchestrator, task graph, contracts, conflicts, verification |
+| [01 — Competitive Architecture Study](01-competitive-study.md) | What the six systems actually do, and the capability matrix |
+| [02 — MCP and Skills Architecture](02-mcp-and-skills.md) | How we consume MCP without forking it, and what a Skill is vs a tool |
+| [03 — Multi-Agent Architecture](03-multi-agent.md) | The orchestrator, task graph, contracts, conflicts, verification |
 | [04 — Model Gateway](04-model-gateway.md) | Provider independence and capability routing |
-| [05 — Security Architecture](05-security-architecture.md) | Sandbox, permissions, secrets, injection defense |
+| [05 — Security Architecture](05-security.md) | Sandbox, permissions, secrets, injection defense |
 | [06 — Project Brain](06-project-brain.md) | Structured project state and memory |
-| [07 — Implementation Roadmap](07-implementation-roadmap.md) | Phases, with a revised dependency order |
+| [07 — Implementation Roadmap](07-original-roadmap.md) | Phases, with a revised dependency order |
 | [08 — Critique](08-critique.md) | **Where this idea is wrong.** Read this one before the roadmap. |

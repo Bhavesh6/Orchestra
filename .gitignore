@@ -1,0 +1,46 @@
+# Secrets — never commit
+.env
+.env.*
+auth.json
+*.key
+*.pem
+
+# Orchestra runtime state
+.orchestra/runs/
+.orchestra/cache/
+.orchestra/leases/
+
+# Node
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.pnpm-store/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# PlatformIO / embedded
+.pio/
+.pioenvs/
+.piolibdeps/
+*.elf
+*.bin
+
+# ML artifacts
+*.ckpt
+*.pt
+*.onnx
+mlruns/
+wandb/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

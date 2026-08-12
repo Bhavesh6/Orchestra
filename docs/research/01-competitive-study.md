@@ -1,7 +1,7 @@
 # Document 1 — Competitive Architecture Study
 
 Evidence grades: **[Doc]** vendor docs read directly · **[Src]** source/spec · **[2°]** secondary source · **[Inf]** my inference · **[Unk]** not public.
-See [Document 0](00-research-method-and-sources.md) for the egress caveat — Cursor, Antigravity, OpenCode and Codex vendor domains were blocked, so those sections lean on [2°].
+See [Document 0](00-method-and-sources.md) for the egress caveat — Cursor, Antigravity, OpenCode and Codex vendor domains were blocked, so those sections lean on [2°].
 
 ---
 
@@ -96,7 +96,7 @@ Hooks, MCP client support, git integration, background tasks, `/resume`, cross-s
 - `AGENTS.md` is the instruction file convention, also used to drive **custom code-review rules**. **[2°]**
 - Hooks inject scripts into the agentic loop (logging, secret-scanning prompts, memory summarization, stop-turn validation), with `/hooks` for trust management. **[2°]**
 
-**What to steal:** the two-axis separation of **sandbox mode** and **approval policy**. It is cleaner than conflating them, and it's the design I recommend in [Document 5](05-security-architecture.md). Also `max_depth` — a hard cap on delegation recursion is a cheap safeguard we should have from day one.
+**What to steal:** the two-axis separation of **sandbox mode** and **approval policy**. It is cleaner than conflating them, and it's the design I recommend in [Document 5](05-security.md). Also `max_depth` — a hard cap on delegation recursion is a cheap safeguard we should have from day one.
 
 ---
 
