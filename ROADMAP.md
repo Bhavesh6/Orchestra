@@ -1,25 +1,25 @@
 # Orchestra — Roadmap
 
-**How we're actually building this, step by step.**
+**How we're actually building it, step by step.**
 
-Each milestone has a **definition of done** that is checkable, not a feeling. We don't move on until it's met. M5 is a genuine decision point where the answer may be "stop here."
+Each milestone has a **definition of done** that is checkable, not a feeling. M5 is a real decision point where the answer may be "stop here."
 
 ---
 
 ## Ordering principle
 
-> Build the deterministic parts first, because they work or they don't — no unproven claims about model behavior. Build the probabilistic parts last, gated on measurement.
+> Build the deterministic parts first — they work or they don't, with no unproven claims about model behaviour. Build the probabilistic parts last, gated on measurement.
 
 That's why gates and contracts come before the orchestrator, even though the orchestrator is the exciting part.
 
 ```
-M0  Setup & decisions          ← 1 week
-M1  Contract engine            ← 2-3 weeks     ← the core mechanism
-M2  Gate runner                ← 1 week
-M3  MCP server                 ← 1 week
-M4  Dogfood on real work       ← 4 weeks       ← the experiment
-M5  DECISION GATE              ← does it help? evidence, not vibes
-M6  Orchestrator               ← only if M5 says yes
+M0  Setup & decisions          ~1 week
+M1  Contract engine            2-3 weeks   ← the core mechanism
+M2  Gate runner                1 week      ← applies to all work
+M3  MCP server                 1 week      ← works in any agent
+M4  Dogfood on real work       4 weeks     ← the experiment
+M5  DECISION GATE                          ← evidence, not vibes
+M6  Orchestrator
 M7  Artifacts / agent manager
 M8  IDE surface
 ```
@@ -28,99 +28,97 @@ M8  IDE surface
 
 ## M0 — Setup & decisions · ~1 week
 
-Get unblocked and lock the choices everything else depends on.
-
 **Tasks**
-- [ ] Repo created, research docs migrated *(done)*
-- [ ] **Get a working agent again**: OpenCode + NVIDIA Build (`https://integrate.api.nvidia.com/v1`, provider block + `auth.json`). Verify tool calling works with Qwen3 Coder 480B or GLM-5.2.
-- [ ] **Language decision**: TypeScript vs Python for the Orchestra tooling. Record as ADR-0005.
-- [ ] **Weekend spike**: write a bare agent loop from scratch (~300 lines — model call, tool dispatch, loop until done). Throwaway. The point is to read OpenCode's source with informed eyes afterward.
-- [ ] **Read OpenCode's source.** Map exactly where L2 plugs in. Decide *extend vs fork* and record as ADR-0006.
-- [ ] Pick the three dogfood projects: one web/API, one ML, one ESP32.
+- [x] Repo, research docs, ADRs 0001–0004
+- [ ] **Working agent again**: OpenCode + NVIDIA Build (`https://integrate.api.nvidia.com/v1`). Verify tool calling on an agentic coding model.
+- [ ] **Language decision** → ADR-0005
+- [ ] **Weekend spike**: bare agent loop from scratch (~300 lines). Throwaway — the point is to read OpenCode's source with informed eyes afterwards.
+- [ ] **Read OpenCode's source.** Map where L2 attaches. Extend vs fork → ADR-0006.
+- [ ] Pick 2–3 dogfood projects across different domains
 
 **Definition of done**
-You're writing code with an agent again, the language is chosen and justified, and you can point at the specific place in OpenCode where Orchestra attaches.
+You're coding with an agent again, the language is chosen and justified, and you can point at the exact place in OpenCode where Orchestra attaches.
 
-**Note on the language choice.** TypeScript has the stronger MCP and agent ecosystem and matches OpenCode. Python is better for the ML contract plugins (pandera, pydantic) and for the embedded scripting. This is a real trade-off — decide it deliberately and write down why.
+**On the language.** TypeScript matches OpenCode and has the stronger MCP ecosystem. Python is better for ML plugins (pandera, pydantic). A real trade-off — decide deliberately, write down why.
 
 ---
 
 ## M1 — Contract engine · ~2–3 weeks
 
-The core mechanism. Everything else is scaffolding around this.
+The core mechanism.
 
 **Tasks**
-- [ ] Contract file format + JSON Schema for the contract-of-contracts
-- [ ] **Plugin interface for contract kinds** — adding a domain must be a plugin, not a core change
-- [ ] Validators: deterministic, no model calls
-  - [ ] `openapi` — schema lint, breaking-change detection
-  - [ ] `sql_schema` — FK integrity, migration ordering
-  - [ ] `data_schema` — shapes, dtypes, ranges, nullability
-  - [ ] `pinmap` — `unique_pins`, `input_only_pins`, `adc2_unusable_with_wifi`, power budget
-- [ ] Generators with `authoritative: true` — generated files are committed *and* verified unmodified
-- [ ] Drift detection: hand-edit to a generated file is an error, not a merge
-- [ ] CLI: `orchestra validate` · `orchestra generate` · `orchestra status`
+- [ ] Contract envelope format + JSON Schema
+- [ ] **Plugin interface for contract kinds** — a new domain must never require a core change
+- [ ] Validators (deterministic, no model calls), in this order:
+  - [ ] `openapi` — schema lint, breaking-change detection vs accepted version
+  - [ ] `sql_schema` — FK integrity, migration ordering, destructive-change guard
+  - [ ] `data_schema` — dtypes, ranges, nullability, leakage invariants
+  - [ ] `pinmap` — the embedded case, once the general path works
+- [ ] Generators with `authoritative: true` — generated files committed *and* verified unmodified
+- [ ] Drift detection: hand-editing a generated file is a failing gate, not a silent merge
+- [ ] CLI: `orchestra validate` · `generate` · `status`
 
 **Definition of done — the thesis test**
 
-> Define `pinmap.yaml` for a real ESP32 project. Generate `pins.h`. Have an agent write `digitalWrite(35, HIGH)`. **The build fails with a message naming the violated contract.**
+> Change a field name in an OpenAPI contract. The generated client regenerates. **The frontend typecheck fails, naming the contract that changed.**
 
-Repeat the equivalent for OpenAPI: change a backend field, watch the frontend typecheck fail.
-
-If both work, the central idea is proven — with no orchestrator, no task graph, no UI.
+The general case comes first deliberately — if it only works for embedded, it isn't a platform. Once that passes, the same test for `pinmap`: an agent writes `digitalWrite(35, HIGH)`, the build fails naming the violated pin contract.
 
 ---
 
 ## M2 — Gate runner · ~1 week
 
+The half that applies to **100%** of work, in every language.
+
 **Tasks**
-- [ ] Declarative `gates.yaml` (`run`, `pass_if`, `timeout`, `artifacts`)
-- [ ] `pass_if` expressions: `exit_zero`, threshold comparisons on parsed metrics (`metrics.auc >= 0.82`)
-- [ ] Structured result schema with evidence references
-- [ ] **Runtime rejection of unverified `complete`** — the rule that makes "done" mean something
-- [ ] Gate artifacts captured: logs, diffs, metric JSON
-- [ ] `orchestra gate <name>` and `orchestra gate --all`
+- [ ] Declarative `gates.yaml` (`run`, `pass_if`, `timeout`, `artifacts`, profiles)
+- [ ] `pass_if`: `exit_zero`, metric thresholds, regex match. Deliberately small — a gate DSL that grows into a language has failed.
+- [ ] Structured results with evidence refs and `observed` values
+- [ ] **Runtime rejection of unverified `complete`**
+- [ ] Distinguish `fail` (criterion unmet) from `error` (couldn't run) — they need different responses
+- [ ] Failures become tasks with diagnostic context, with a retry cap
 
 **Definition of done**
-An agent claims a task is complete while a gate fails. Orchestra rejects it and returns the failing gate plus its evidence.
+An agent claims complete while a gate fails. Orchestra rejects it and returns the failing gate plus evidence.
 
 ---
 
 ## M3 — MCP server · ~1 week
 
-The step that makes L2 useful everywhere without building a runtime.
+What makes L2 useful everywhere without building a runtime.
 
 **Tasks**
-- [ ] `orchestra-mcp` against the **2026-07-28** spec — stateless core, MRTR, cacheable lists. **Do not implement `sampling`, `roots`, or `logging`** (deprecated).
-- [ ] Tools: `contract.read`, `contract.propose`, `contract.validate`, `generate.run`, `gate.list`, `gate.run`, `status`
-- [ ] Isolate transport behind an interface — the spec broke once and will again
+- [ ] `orchestra-mcp` on the **2026-07-28** spec — stateless core, MRTR, cacheable lists. **No `sampling`/`roots`/`logging`** (deprecated).
+- [ ] Tools: `contract.read` · `contract.propose` · `contract.validate` · `generate.run` · `gate.list` · `gate.run` · `status`
+- [ ] Transport behind an interface — the spec broke once and will again
 - [ ] Verify in OpenCode, Claude Code, and Cline
 
 **Definition of done**
-Three different agents, unmodified, can read contracts and run gates through Orchestra.
+Three different agents, unmodified, read contracts and run gates through Orchestra.
 
 ---
 
 ## M4 — Dogfood · ~4 weeks
 
-**This is the experiment.** It runs on work you were doing anyway, at zero marginal cost.
+**The experiment.** Runs on work you were doing anyway, across **at least two different domains** — that's what tells us whether the core is genuinely domain-agnostic or quietly specialised.
 
 **Tasks**
-- [ ] Use Orchestra on all three real projects (web/API, ML, ESP32)
-- [ ] Keep a log: every time a contract or gate caught something a review would have missed — and every time it got in the way
-- [ ] Track: contract violations caught, gate failures caught, false positives, time spent maintaining contracts
+- [ ] Use Orchestra on 2–3 real projects in different domains
+- [ ] Log every catch a review would have missed — and every time it got in the way
+- [ ] Track: violations caught, gate failures caught, false positives, contract maintenance time
 - [ ] Note which contract kinds earn their keep and which are ceremony
 
 **Definition of done**
-Four weeks of real usage with written evidence. Specifically: **does the contract maintenance cost less than the errors it prevents?** That question has no armchair answer.
+Four weeks of real usage with written evidence, in more than one domain. The question with no armchair answer: **does contract maintenance cost less than the errors it prevents?**
 
 ---
 
-## M5 — Decision gate · the honest checkpoint
+## M5 — Decision gate
 
 Not a milestone. A fork in the road.
 
-**Run the three-arm benchmark** on ~20 realistic tasks:
+**Three-arm benchmark** on ~20 realistic tasks:
 
 | Arm | Setup |
 | --- | --- |
@@ -128,44 +126,41 @@ Not a milestone. A fork in the road.
 | **B** | Single agent + contracts + gates |
 | **C** | Multi-agent + contracts + gates |
 
-Measure: correctness, compile success, test/eval pass, retries, tokens, wall clock, cost, contradictions, human interventions.
+Measure: correctness, build success, test/eval pass, retries, tokens, wall clock, cost, contradictions, human interventions.
 
 **Decision rules**
-- **B ≫ A** → the thesis holds. Contracts and gates are the product.
-- **C ≫ B** on wall-clock at acceptable cost → build M6. The orchestrator is justified.
-- **C ≈ B or worse** → **stop at L2.** Ship the contract system, skip the orchestrator, and be glad we found out in 3 months rather than 18.
+- **B ≫ A** → thesis holds; contracts and gates are the product
+- **C ≫ B** on wall clock at acceptable cost → build M6
+- **C ≈ B or worse** → **stop at L2.** A planned outcome, not a failure.
 
-**Prediction on record:** B captures most of the gain. Writing it down now so we can't rationalize later.
+**Prediction on record:** B captures most of the gain. Written now so it can't be rationalised later.
 
-⚠️ **Provider constraint to account for:** NVIDIA Build free tier is **40 requests/minute**. Agentic loops are request-heavy. Arm C may be rate-limited before coordination overhead even matters — measure requests/min, not just cost.
+⚠️ NVIDIA Build free tier is **40 requests/minute**. Arm C may be rate-limited before coordination overhead even binds — measure requests/min, not just cost.
 
 ---
 
 ## M6 — Orchestrator · only if M5 justifies it
 
-- [ ] Task DAG with `file_scope` for conflict *prevention* (not resolution)
-- [ ] Scheduler: topological order + file-scope disjointness + concurrency cap + rate-limit headroom
+- [ ] Task DAG with `file_scope` for conflict *prevention*, not resolution
+- [ ] Scheduler: topological order + scope disjointness + concurrency cap + rate-limit headroom
 - [ ] **Mandatory human plan-approval gate** — a wrong decomposition is the most expensive failure available
-- [ ] Blackboard results, no agent-to-agent chat
-- [ ] Structured result schema across agents
-- [ ] **Single-agent fallback as the default**, with the orchestrator explaining when it declines to parallelize
+- [ ] Blackboard results; no agent-to-agent chat
+- [ ] **Single-agent default**, with the orchestrator explaining when it declines to parallelise
 - [ ] Worktree per writing agent; sequential merge queue
-
----
 
 ## M7 — Artifacts & agent manager
 
-The Antigravity-shaped part. Only meaningful on a mature L1+L2.
+The Antigravity-shaped surface. Meaningful only on a mature L1+L2.
 
-- [ ] Artifacts as the review surface: plans, diffs, gate results, screenshots, cost — not six scrolling transcripts
-- [ ] Task graph visualization
+- [ ] Artifacts as the review surface: plans, diffs, gate results, screenshots, cost — not N scrolling transcripts
+- [ ] Task graph visualisation
 - [ ] Commentable plans before execution
 
 ## M8 — IDE surface
 
 - [ ] TUI first
 - [ ] VS Code extension before considering a fork
-- [ ] Fork only if the extension API genuinely blocks us — that's how Cursor, Windsurf and Antigravity all got there, and all of them started later than they needed to
+- [ ] Fork only if the extension API genuinely blocks us — that's how Cursor, Windsurf and Antigravity all got there, and all of them later than they needed to
 
 ---
 
@@ -179,27 +174,27 @@ The Antigravity-shaped part. Only meaningful on a mature L1+L2.
 | Browser automation engine | Playwright MCP, Chrome DevTools MCP |
 | Embedded toolchain wrappers | platformio-mcp, serial-mcp |
 | Provider adapters | Vercel AI SDK / LiteLLM |
-| Local model support | Hardware isn't there; cloud is free and better |
+| Local model support | Cloud is free and better; hardware isn't there |
 | Agent-to-agent chat | Blackboard — deliberate |
-| Intelligent model routing | Needs data we won't have for months; static role profiles first |
+| Intelligent model routing | Needs data we won't have for months |
 | A UI before M8 | The API is the product |
 
 ---
 
-## Risks we're actively watching
+## Risks we're watching
 
 | Risk | Watch for | Response |
 | --- | --- | --- |
-| Contract maintenance exceeds benefit | M4 log | Drop contract kinds that don't earn keep |
+| Contract maintenance exceeds benefit | M4 log | Drop kinds that don't earn keep |
 | Generated artifacts drift | Hand-edits to generated files | `authoritative: true` + drift gate |
-| Contracts only work in crisp domains | ML/web vs embedded comparison in M4 | Narrow scope honestly |
-| Multi-agent never pays off | M5 benchmark | Stop at L2 — planned outcome, not failure |
-| Rate limits throttle everything | Requests/min in M4–M5 | Multi-provider failover |
-| Scope explosion | Milestones slipping | The DoD gates. Ruthlessly. |
-| Someone else ships this first | — | Ship L2 fast; it's weeks, not years |
+| Core quietly becomes domain-specific | M4 across ≥2 domains | Plugin interface, enforced |
+| Multi-agent never pays off | M5 benchmark | Stop at L2 — planned |
+| Rate limits throttle everything | requests/min in M4–M5 | Multi-provider failover |
+| Scope explosion | Milestones slipping | The DoD gates, ruthlessly |
+| Someone ships this first | — | L2 is weeks, not years |
 
 ---
 
 ## Current status
 
-**M0, in progress.** Next concrete action: get OpenCode + NVIDIA Build running, then decide the implementation language.
+**M0, in progress.** Next: OpenCode + NVIDIA Build running, then the language decision.

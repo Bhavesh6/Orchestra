@@ -1,94 +1,104 @@
 # Orchestra
 
-**A contract-driven, verification-gated AI development environment.**
+**An agentic development environment — model-agnostic, verification-first.**
 
-> An AI development environment where the agent has to prove it's done, and where architectural decisions are enforced by the compiler rather than remembered by a model.
+Same category as Claude Code, Codex, Antigravity, Cursor, OpenCode and Cline: an environment where agents read your project, write code, run commands, use tools, and work across a whole codebase. Orchestra differs on three things.
+
+| | Orchestra |
+| --- | --- |
+| **Model** | Any provider. Nothing is built on one vendor. Cloud inference; the machine runs tools. |
+| **Completion** | An agent can't say "done" — the runtime rejects it unless the gates it declared actually pass. |
+| **Decisions** | Architectural decisions generate code, so violating one is a build error rather than a review comment. |
 
 **Status:** Research complete. Implementation starting at M0. No product code yet.
 
 ---
 
-## The problem
+## What it's for
 
-AI coding agents fail in two ways that nothing currently catches:
+General software work — web apps, APIs, backends, ML pipelines, and yes, embedded firmware. Nothing in the core is domain-specific.
 
-1. **They forget decisions.** An agent assigns `GPIO34` to a sensor, then an hour later writes `digitalWrite(35, HIGH)`. Or the backend renames a field and the frontend still expects the old one. No linter, no test, and no review catches it until something breaks at runtime — or, in embedded work, until hardware is damaged.
+The two problems it targets are ones every agentic environment has, in every language:
 
-2. **They say "done" without proof.** "I improved the model." "The refactor is complete." These are claims, not facts, and today nothing forces the difference.
+**1. Agents forget decisions.** The backend renames a field and the frontend still expects the old one. A schema changes and three call sites don't. Nothing catches it — not the linter, not the tests, not review — until it breaks at runtime.
 
-Orchestra addresses both mechanically rather than by asking a model to be careful.
+**2. Agents say "done" without proof.** *"Refactor complete."* *"I improved the model."* These are claims. Today nothing forces them to be facts.
 
 ## The two mechanisms
 
-**Contracts generate authoritative artifacts.** A pin map generates `pins.h`. An OpenAPI spec generates a typed client. A data schema generates validators. Once generated, violating the decision is a **compile error**, not a code-review finding.
-
-```
-  pinmap.yaml  ──generates──►  pins.h  ──►  compiler rejects wrong pin
-  openapi.yaml ──generates──►  client.ts ──►  typecheck rejects wrong field
-  schema.yaml  ──generates──►  validators ──►  pipeline rejects wrong shape
-```
-
-**Gates enforce completion.** An agent's result is rejected by the runtime unless every declared gate passes. Not requested in a prompt — enforced in code.
+**Gates enforce completion.** Declarative, and they apply to **everything** — every language, every domain, every task.
 
 ```yaml
 gates:
   build: { run: "npm run build",  pass_if: exit_zero }
   types: { run: "tsc --noEmit",   pass_if: exit_zero }
+  test:  { run: "pytest -q",      pass_if: exit_zero }
   eval:  { run: "python eval.py", pass_if: "metrics.auc >= 0.82" }
 ```
 
-Both work with a **single agent**. Neither requires orchestration. That's deliberate.
+A result marked `complete` while a gate fails is rejected by the runtime — not asked for in a prompt.
+
+**Contracts generate authoritative artifacts.** At interfaces — where coordination actually breaks — a decision generates the code that enforces it.
+
+```
+  openapi.yaml ──generates──►  client.ts    ──►  typecheck rejects wrong field
+  schema.sql   ──generates──►  models/types ──►  compile rejects wrong column
+  features.yaml──generates──►  validators   ──►  pipeline rejects wrong shape
+  pinmap.yaml  ──generates──►  pins.h       ──►  compile rejects wrong pin
+```
+
+Gates cover all your work. Contracts cover the interfaces — roughly 20–30%, but it's the part where silent breakage lives.
+
+Both work with **a single agent**. Neither needs orchestration. That's deliberate.
 
 ## Domains
 
-Orchestra is general-purpose. Contract kinds are plugins, not hardcoded:
+Contract kinds are plugins. Adding a domain is a plugin, never a core change.
 
 | Domain | Contract | Generates | Gates |
 | --- | --- | --- | --- |
-| **Web/API** | OpenAPI | typed client, server stubs, contract tests | `tsc`, lint, vitest, Playwright |
-| **ML** | data/feature schema, metric thresholds | validators, inference wrapper | pytest, eval-beats-baseline, leakage check |
-| **Database** | schema | migrations, models, types | migration lint, FK integrity |
-| **Embedded** | pin map, power budget | `pins.h` | compile, pin audit, flash smoke test |
+| **Web / API** | OpenAPI | typed client, server stubs, contract tests | tsc, lint, vitest, Playwright |
+| **Backend / data** | SQL schema | migrations, models, types | migration lint, FK integrity |
+| **ML** | feature schema, metric thresholds | validators, inference wrapper | pytest, eval-beats-baseline, leakage check |
+| **Embedded** | pin map, power budget | `pins.h` | compile, pin audit, flash smoke |
 
 ## Architecture
 
-Three layers. Only two of them are ours.
+Three layers. Only two are ours.
 
 ```
 ┌──────────────────────────────────────────────────┐
-│  L3  ORCHESTRATOR + ARTIFACTS       ← ours, later│
-│      task graph, agent manager, review surface   │
+│  L3  ORCHESTRATOR · ARTIFACTS · IDE   ← ours,    │
+│      the Antigravity-shaped surface     later    │
 ├──────────────────────────────────────────────────┤
-│  L2  CONTRACTS + GATES              ← ours, now  │
-│      validators, generators, gate runner, MCP    │
+│  L2  CONTRACTS + GATES                ← ours,    │
+│      validators, generators, MCP server   now    │
 ├──────────────────────────────────────────────────┤
-│  L1  AGENT RUNTIME                  ← reused     │
+│  L1  AGENT RUNTIME                    ← reused   │
 │      OpenCode (MIT): loop, tools, MCP, LSP,      │
 │      sessions, permissions, 75+ providers        │
 └──────────────────────────────────────────────────┘
                         │
-              MODEL GATEWAY (cloud only)
+              MODEL GATEWAY (cloud)
      NVIDIA Build · Anthropic · OpenAI · Google · OpenRouter
 ```
 
-**L1 is reused, not rebuilt.** Google forked VS Code to build Antigravity. Cursor and Windsurf are VS Code forks. Nobody builds this from zero, and neither will we — the agent loop is a weekend, but a reliable edit tool is months.
+**Why L1 is reused.** Google forked VS Code to build Antigravity — code analysis suggests it's actually a fork of Windsurf, itself a VS Code fork. Cursor and Windsurf are forks too. A company with a reported $2.4B did not start from zero, and neither will we. The agent loop is a weekend of work; a *reliable edit tool* is months, and that's the part that decides whether the environment is usable.
 
-**L2 ships as an MCP server**, so it works inside OpenCode, Claude Code, Cline, Codex and Cursor on day one.
+**Why L2 ships as an MCP server.** It works inside OpenCode, Claude Code, Cline, Codex and Cursor on day one. It also means L1 is swappable — if OpenCode stops being a good host, we replace it without touching L2.
 
-**L3 is a hypothesis**, not a premise. See [the critique](docs/research/08-critique.md).
+**Why L3 is last.** An agent manager is impressive because it sits on a mature runtime. Built first, on nothing, it's a dashboard showing agents fail in parallel. See [the critique](docs/research/08-critique.md).
 
 ## Documentation
 
 | | |
 | --- | --- |
 | **[ROADMAP.md](ROADMAP.md)** | **How we're building it. Start here.** |
-| [docs/design/](docs/design/) | Contract spec, gate spec, architecture |
+| [docs/design/](docs/design/) | Contract spec, gate spec |
 | [docs/decisions/](docs/decisions/) | ADRs — what we decided and why |
-| [docs/research/](docs/research/) | The competitive study and evidence base |
+| [docs/research/](docs/research/) | Competitive study of the six systems, and the evidence base |
 
-**Two research documents matter most:**
-- [09 — Answers & Course Correction](docs/research/09-answers-and-correction.md) — the current position
-- [08 — Critique](docs/research/08-critique.md) — where this idea is wrong
+Two research docs matter most: [09 — Answers & Course Correction](docs/research/09-answers-and-correction.md) (current position) and [08 — Critique](docs/research/08-critique.md) (where this idea is wrong).
 
 ## Principles
 
@@ -96,8 +106,9 @@ Three layers. Only two of them are ours.
 2. **Evidence over enthusiasm.** Multi-agent execution is gated on measurement, not assumed.
 3. **Deterministic before probabilistic.** If a check can be a validator instead of a model call, it is.
 4. **Useful with one agent.** Nothing core may require orchestration to be valuable.
-5. **Cloud inference only.** No local models — the hardware isn't there and doesn't need to be.
-6. **Prove it, don't claim it.** Applies to the agents, and to us.
+5. **Domain-agnostic core.** Every domain is a plugin. No exceptions.
+6. **Cloud inference only.** The machine runs tools, not models.
+7. **Prove it, don't claim it.** Applies to the agents, and to us.
 
 ## License
 

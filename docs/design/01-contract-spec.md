@@ -80,24 +80,7 @@ This is the answer to "who maintains this?" — generated artifacts cannot rot w
 
 ## Kinds
 
-### `pinmap` (embedded)
-
-```yaml
-kind: pinmap
-spec:
-  board: esp32-devkit-v1
-  assignments:
-    - { signal: MQ9_ADC,    pin: GPIO34, mode: analog_in, adc: ADC1 }
-    - { signal: DHT22_DATA, pin: GPIO4,  mode: digital_io, pullup: external_10k }
-    - { signal: LCD_SDA,    pin: GPIO21, mode: i2c_sda }
-  power:
-    supply_ma: 500
-    components:
-      - { name: DHT22, typical_ma: 1.5, peak_ma: 2.5 }
-```
-
-Rules: `unique_pins`, `input_only_pins`, `adc2_unusable_with_wifi`, `strapping_pin_warning`, `i2c_bus_consistency`, `power_budget_within_supply`.
-Generates: `pins.h`, optionally a `platformio.ini` fragment.
+Kinds are plugins. The general ones come first — they're the ones that prove the core is domain-agnostic. If a mechanism only works for one domain, it isn't a platform.
 
 ### `openapi` (web/API)
 
@@ -147,6 +130,26 @@ spec:
 ```
 
 Doesn't generate code — it generates a **gate**. This is how "I improved the model" stops being an unverifiable claim.
+
+### `pinmap` (embedded)
+
+One domain plugin among several, implemented after the general kinds work. Included because it's the sharpest illustration of the mechanism: the violation is otherwise invisible until hardware misbehaves.
+
+```yaml
+kind: pinmap
+spec:
+  board: esp32-devkit-v1
+  assignments:
+    - { signal: SENSOR_ADC, pin: GPIO34, mode: analog_in, adc: ADC1 }
+    - { signal: DHT22_DATA, pin: GPIO4,  mode: digital_io, pullup: external_10k }
+  power:
+    supply_ma: 500
+    components:
+      - { name: DHT22, typical_ma: 1.5, peak_ma: 2.5 }
+```
+
+Rules: `unique_pins`, `input_only_pins`, `adc2_unusable_with_wifi`, `strapping_pin_warning`, `i2c_bus_consistency`, `power_budget_within_supply`.
+Generates: `pins.h`, optionally a `platformio.ini` fragment.
 
 ---
 
