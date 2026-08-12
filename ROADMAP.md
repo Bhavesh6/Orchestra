@@ -148,19 +148,26 @@ Measure: correctness, build success, test/eval pass, retries, tokens, wall clock
 - [ ] **Single-agent default**, with the orchestrator explaining when it declines to parallelise
 - [ ] Worktree per writing agent; sequential merge queue
 
-## M7 — Artifacts & agent manager
+## M7 — Agent manager & artifacts
 
-The Antigravity-shaped surface. Meaningful only on a mature L1+L2.
+The Antigravity-shaped surface, and the first interface that is **ours**. A web client against the L1 server — see [ADR-0007](docs/decisions/ADR-0007-interface-strategy.md).
 
-- [ ] Artifacts as the review surface: plans, diffs, gate results, screenshots, cost — not N scrolling transcripts
-- [ ] Task graph visualisation
-- [ ] Commentable plans before execution
+- [ ] Artifact-centric review: plans, diffs, gate results, screenshots, cost — not N scrolling transcripts
+- [ ] Task graph visualisation with live status
+- [ ] Commentable implementation plans, reviewed before execution
+- [ ] Per-run cost and gate history
 
-## M8 — IDE surface
+Meaningful only on a mature L1+L2. Built first, on nothing, an agent manager is a dashboard showing agents fail in parallel.
 
-- [ ] TUI first
-- [ ] VS Code extension before considering a fork
-- [ ] Fork only if the extension API genuinely blocks us — that's how Cursor, Windsurf and Antigravity all got there, and all of them later than they needed to
+## M8 — Editor integration
+
+- [ ] Orchestra TUI
+- [ ] **VS Code extension**
+- [ ] Fork only if the extension API demonstrably blocks a required capability
+
+Cursor, Windsurf and Antigravity are all VS Code forks — it works, and it's a permanent maintenance tax they had teams to pay. Extension first; fork is a decision we make when we hit a wall, not before.
+
+> **Note on interface timing.** "UI last" does not mean "no UI until last." OpenCode's TUI is the interface from M0, and M3 puts contracts and gates inside five existing agents via MCP. There is no stage without a usable interface.
 
 ---
 

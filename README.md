@@ -89,6 +89,23 @@ Three layers. Only two are ours.
 
 **Why L3 is last.** An agent manager is impressive because it sits on a mature runtime. Built first, on nothing, it's a dashboard showing agents fail in parallel. See [the critique](docs/research/08-critique.md).
 
+## Interface
+
+Orchestra is an application you use, not a library. But you don't wait until the end to get one — because L1 already has a TUI, and L2 surfaces inside agents you already run.
+
+| Stage | What you actually use | Built by |
+| --- | --- | --- |
+| **Now (M0)** | OpenCode's TUI, pointed at NVIDIA Build | inherited |
+| **M3** | contracts + gates visible *inside* OpenCode, Claude Code, Cline, Codex, Cursor — via MCP | us, ~1 week |
+| **M7** | **Agent manager** — the Antigravity-shaped surface: artifacts, plans, diffs, gate results, cost | us |
+| **M8** | Orchestra TUI, then a VS Code extension | us |
+
+The reason this ordering works is L1's shape: OpenCode is **client–server**, and its TUI is only a client talking HTTP + SSE. Any interface we build is another client against the same server. That's why the UI can come last without the UI being an afterthought — the API it needs already exists and is already proven by a real client.
+
+**On the app form factor.** Cursor, Windsurf and Antigravity are all VS Code forks — Antigravity's codebase reportedly still carries references to Windsurf's Cascade agent. Forking is the established path, but it's also a permanent maintenance tax: you inherit every upstream release forever. They had teams for that.
+
+Our order is **extension before fork**: a VS Code extension first, and a fork only if the extension API genuinely blocks something we need. See [ADR-0007](docs/decisions/ADR-0007-interface-strategy.md).
+
 ## Documentation
 
 | | |
