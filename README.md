@@ -20,6 +20,9 @@ This repository contains the research and architecture specification requested b
 | 6 | [Project Brain](docs/06-project-brain.md) | Structured project state, contracts, decisions, evidence, memory |
 | 7 | [Implementation Roadmap](docs/07-implementation-roadmap.md) | Revised phases, risks, tech choices, what we won't build |
 | 8 | **[Critique](docs/08-critique.md)** | **Where this idea is wrong. Read this one first.** |
+| 9 | **[Answers (A–O) & Course Correction](docs/09-answers-and-course-correction.md)** | **Written after the full project history. Answers A–O, and argues the scope should collapse from a platform to an MCP server. Start here.** |
+
+> **If you read one thing:** [Document 9](docs/09-answers-and-course-correction.md). The originating problem — a Claude Pro subscription ending — has a 30-minute solution (OpenCode + NVIDIA Build), and the actual differentiator (contracts) ships as an MCP server that works inside every agent you already use. No runtime required.
 
 ---
 
