@@ -31,7 +31,7 @@ M8  IDE surface
 **Tasks**
 - [x] Repo, research docs, ADRs 0001–0004
 - [ ] **Working agent again**: OpenCode + NVIDIA Build (`https://integrate.api.nvidia.com/v1`). Verify tool calling on an agentic coding model.
-- [ ] **Language decision** → ADR-0005
+- [x] **Language decision** → [ADR-0005](docs/decisions/ADR-0005-typescript-for-the-engine.md): **TypeScript on Bun**, domain plugins may shell out
 - [ ] **Weekend spike**: bare agent loop from scratch (~300 lines). Throwaway — the point is to read OpenCode's source with informed eyes afterwards.
 - [ ] **Read OpenCode's source.** Map where L2 attaches. Extend vs fork → ADR-0006.
 - [ ] Pick 2–3 dogfood projects across different domains
@@ -39,7 +39,9 @@ M8  IDE surface
 **Definition of done**
 You're coding with an agent again, the language is chosen and justified, and you can point at the exact place in OpenCode where Orchestra attaches.
 
-**On the language.** TypeScript matches OpenCode and has the stronger MCP ecosystem. Python is better for ML plugins (pandera, pydantic). A real trade-off — decide deliberately, write down why.
+**Language: decided — TypeScript on Bun.** The deciding factor is that ADR-0006 is still open: if we extend OpenCode rather than fork it, TypeScript becomes mandatory rather than preferred. ML contract validation shells out to Python, exactly as gates already do. Full reasoning and the costs we accepted are in [ADR-0005](docs/decisions/ADR-0005-typescript-for-the-engine.md).
+
+Note that the engine's language is unrelated to the languages of the projects Orchestra manages — a gate is a subprocess, so a TypeScript engine checks Python, Rust and C++ equally well.
 
 ---
 
