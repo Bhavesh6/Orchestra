@@ -35,6 +35,8 @@ M8  IDE surface
 - [ ] **Weekend spike**: bare agent loop from scratch (~300 lines). Throwaway — the point is to read OpenCode's source with informed eyes afterwards.
 - [ ] **Read OpenCode's source.** Map where L2 attaches. Extend vs fork → ADR-0006.
 - [ ] Pick 2–3 dogfood projects across different domains
+- [ ] **Evaluate GitHub Spec Kit hands-on** (MIT, ~111k stars, 30+ agent integrations). It answers *what to build*; Orchestra answers *this interface is now enforced*. If it does its half well, **adopt it rather than rebuild it** — same reuse principle as ADR-0001. See [Document 10](docs/research/10-prior-art-sdd-landscape.md).
+- [ ] **Check Tessl's GA status.** Closest competitor — spec-as-source with generated-code markers. If its Framework ships executable constraints, revisit positioning.
 
 **Definition of done**
 You're coding with an agent again, the language is chosen and justified, and you can point at the exact place in OpenCode where Orchestra attaches.

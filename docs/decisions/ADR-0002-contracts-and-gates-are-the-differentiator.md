@@ -1,6 +1,22 @@
 # ADR-0002 — Contracts and gates are the differentiator
 
-**Status:** accepted · **Date:** 2026-08-12
+**Status:** accepted, **amended 2026-08-12** · **Date:** 2026-08-12
+
+> ### ⚠️ Amendment — the original claim was wrong
+>
+> This ADR originally stated that nothing in the field does contracts-that-generate-artifacts or enforced verification. That is **false**. [Document 10](../research/10-prior-art-sdd-landscape.md) surveys the Spec-Driven Development landscape, which the original research missed entirely because it looked only at agentic *environments* and never at the methodology tooling layered on top.
+>
+> **Tessl** generates code from specs with `// GENERATED FROM SPEC - DO NOT EDIT` markers. **agent-gates** gates completion on evidence. **GitHub Spec Kit** has ~111k stars and 30+ agent integrations.
+>
+> The differentiator survives, but only when stated precisely:
+>
+> **Every SDD tool's spec is prose an LLM is asked to follow — the authority is convention. Orchestra's constraints are executable functions and generated artifacts the compiler enforces — the authority is the toolchain.**
+>
+> `unique_pins` and `fk_integrity` are functions that run in milliseconds and cannot be partially obeyed. EARS phrasing is not an executable contract. That gap is named by third-party analysis of the incumbents, not invented by us.
+>
+> Also revised: Orchestra covers **interfaces only** (~20–30% of work), which deliberately avoids the rigidity criticism that lands on Tessl's 1:1 spec-per-file mapping — an approach reviewers compare to early-2000s Model-Driven Development.
+>
+> **Strategic consequence:** do not compete with Spec Kit on specs. Compose with it. It answers *what to build*; Orchestra answers *this interface decision is now mechanically enforced*.
 
 ## Context
 
