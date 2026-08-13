@@ -110,7 +110,10 @@ Our order is **extension before fork**: a VS Code extension first, and a fork on
 
 | | |
 | --- | --- |
-| **[ROADMAP.md](ROADMAP.md)** | **How we're building it. Start here.** |
+| **[NEXT.md](NEXT.md)** | **The exact next task. Start here.** |
+| [AGENTS.md](AGENTS.md) | Context for any agent working in this repo |
+| [ROADMAP.md](ROADMAP.md) | M0–M8 with checkable definitions of done |
+| [docs/setup/](docs/setup/) | Verified local setup — OpenCode + NVIDIA Build |
 | [docs/design/](docs/design/) | Contract spec, gate spec |
 | [docs/decisions/](docs/decisions/) | ADRs — what we decided and why |
 | [docs/research/](docs/research/) | Competitive study of the six systems, and the evidence base |

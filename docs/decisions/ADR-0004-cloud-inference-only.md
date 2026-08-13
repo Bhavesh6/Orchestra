@@ -26,8 +26,8 @@ Local model support (Ollama, vLLM) stays in the adapter list as a **last-resort 
 
 | Tier | Provider | Used for |
 | --- | --- | --- |
-| **Heavy** | NVIDIA Build — Qwen3 Coder 480B, GLM-5.2, DeepSeek V4 | coding, decomposition, review, adjudication |
-| **Fast** | Groq | file triage, classification, summaries, commit messages |
+| **Heavy** | NVIDIA Build — **`z-ai/glm-5.2`** (verified) | coding, decomposition, review, adjudication |
+| **Fast** | `nvidia/nvidia-nemotron-nano-9b-v2`, else Groq | file triage, classification, summaries, commit messages |
 | **Failover** | whichever tier is not currently throttled | continuity |
 
 **Groq is the fast tier and a failover path — never the driver.** Two reasons:
@@ -36,6 +36,16 @@ Local model support (Ollama, vLLM) stays in the adapter list as a **last-resort 
 2. **Open-weight ceiling.** Token *rate* is excellent; model *capability* sits below the heavy tier. For hard agentic coding, capability beats speed — a fast model needing four tool-call iterations instead of two is slower end to end and burns more quota.
 
 Two free providers with different limits is strictly better than one, which is the continuity argument below.
+
+### Catalogue verified 2026-08-13
+
+Checked against the live catalogue rather than secondary sources. Two corrections:
+
+- **`z-ai/glm-5.2` is present and free** — *"flagship LLM for agentic workflows, coding, and long-horizon reasoning,"* tagged `agentic ai`, released ~1 month prior. This is the driver.
+- **Qwen3 Coder 480B was not found.** It came from a blog post, not the catalogue. Treat model lists in secondary sources as unverified.
+- **`nvidia/nvidia-nemotron-nano-9b-v2`** (*"excelling in reasoning and agentic tasks"*) may cover the fast tier well enough that **Groq becomes unnecessary**. Test before adding a second provider — one fewer provider is one fewer failure mode.
+
+> ⚠️ **The catalogue's `Code Generation` filter is under-curated** and actively misleading: it returns 5 old Llama models and reports `Publisher: NVIDIA 0` on NVIDIA's own site. GLM-5.2 doesn't appear under it. **Always search unfiltered.**
 
 ### Rule: read TPM before RPM
 

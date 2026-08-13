@@ -30,7 +30,8 @@ M8  IDE surface
 
 **Tasks**
 - [x] Repo, research docs, ADRs 0001–0004
-- [ ] **Working agent again**: OpenCode + NVIDIA Build (`https://integrate.api.nvidia.com/v1`). Verify tool calling on an agentic coding model.
+- [x] **Model + provider verified**: `z-ai/glm-5.2` on NVIDIA Build, free endpoint. Config and the tool-calling verification test are in [docs/setup/opencode-nvidia.md](docs/setup/opencode-nvidia.md).
+- [ ] **Working agent again**: run the 3-point tool-calling test from that guide (reads files unprompted · edits land · runs commands and reacts)
 - [x] **Language decision** → [ADR-0005](docs/decisions/ADR-0005-typescript-for-the-engine.md): **TypeScript on Bun**, domain plugins may shell out
 - [ ] **Weekend spike**: bare agent loop from scratch (~300 lines). Throwaway — the point is to read OpenCode's source with informed eyes afterwards.
 - [ ] **Read OpenCode's source.** Map where L2 attaches. Extend vs fork → ADR-0006.
